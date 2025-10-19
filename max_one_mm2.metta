@@ -1,7 +1,6 @@
 
 (succ 0 1) (succ 1 2) (succ 2 3) (succ 3 4) (succ 4 5) (succ 5 6) (succ 6 7) (succ 7 8) (succ 8 9) (succ 9 10) (succ 10 11) (succ 11 12) (succ 12 13) (succ 13 14) (succ 14 15) (succ 15 16) (succ 16 17) (succ 17 18) (succ 18 19) (succ 19 20) (succ 20 21) (succ 21 22) (succ 22 23) (succ 23 24) (succ 24 25) (succ 25 26) (succ 26 27) (succ 27 28) (succ 28 29) (succ 29 30) 
-(succ 30 31) (succ 31 32) (succ 32 33) (succ 33 34) (succ 34 35) (succ 35 36) (succ 36 37) (succ 37 38) (succ 38 39) (succ 39 40) (succ 40 41) (succ 41 42) (succ 42 43) (succ 43 44) (succ 44 45) (succ 45 46) (succ 46 47) (succ 47 48) (succ 48 49) (succ 49 50) (succ 50 51) (succ 51 52) (succ 52 53) (succ 53 54) (succ 54 55) (succ 55 56) (succ 56 57) (succ 57 58) (succ 58 59)
-(succ 59 60) (succ 60 61) (succ 61 62) (succ 62 63) (succ 63 64) (succ 64 65) (succ 65 66) (succ 66 67) (succ 67 68) (succ 68 69) (succ 69 70) (succ 70 71) (succ 71 72) (succ 72 73) (succ 73 74) (succ 74 75) (succ 75 76) (succ 76 77) (succ 77 78) (succ 78 79) (succ 79 80) (succ 80 81) (succ 81 82) (succ 82 83) (succ 83 84) (succ 84 85) (succ 85 86) (succ 86 87) (succ 87 88) (succ 88 89) (succ 89 90)
+(succ 30 31) (succ 31 32) (succ 32 33) (succ 33 34) (succ 34 35) (succ 35 36) (succ 36 37) (succ 37 38) (succ 38 39) (succ 39 40) (succ 40 41) (succ 41 42) (succ 42 43) (succ 43 44) (succ 44 45) (succ 45 46) (succ 46 47) (succ 47 48) (succ 48 49) (succ 49 50) (succ 50 51)
 ;            succ
 ;             v
 (exec (IC 0 1 0)
@@ -21,10 +20,8 @@
       (, (petri $lprocess)
          (petri $rprocess)))
 
-
-
 ;; run generation :- run all steps for one generation
-(exec run-gen
+((run-gen)
        (, ((step_r $name) $p1 $t1))
        (, (exec $name $p1 $t1))
 )
@@ -76,22 +73,21 @@
           (- (petri (! New_siblings ((Cons $h5 $t5) (Cons $h6 $t6)))))
           (+ (petri (Cons $h4 $t4)))
           (+ (petri (Cons $h5 $t5)))
-          (+ (petri (Cons $h6 $t6)))
-          (+ (removed))))
+          (+ (petri (Cons $h6 $t6)))))
 
-(Gen 0 1) (Gen 1 2) (Gen 2 3) (Gen 3 4) (Gen 4 5)
+(Gen 0 1) (Gen 1 2) (Gen 2 3) (Gen 3 4) (Gen 4 5) 
 ;; Main loop :-
 ;;         run for 5 generations
-
 (exec (Main 0)
        (, (exec (Main $a) $p $t )
-           (exec run-gen $p1 $t1) (Gen $a $b))
+           ((run-gen) $p1 $t1) (Gen $a $b))
        (, (exec run-gen $p1 $t1)
           (exec (Main $b) $p $t )
          (Gen $a $b)))
 
 
 ;; intial popluation
+
 (petri (Cons 0 (Cons 1 (Cons 0 (Cons 1 (Cons 1 Nil))))))
 (petri (Cons 0 (Cons 0 (Cons 1 (Cons 1 (Cons 1 Nil))))))
 (petri (Cons 1 (Cons 1 (Cons 0 (Cons 1 (Cons 1 Nil))))))
@@ -164,9 +160,5 @@
 )
 
 (petri (? (crossover $ret) (Z $l1 $l2) (! $ret ($l2 $l1))))
-
-
-
-
 
 
