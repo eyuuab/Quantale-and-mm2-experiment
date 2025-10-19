@@ -9,8 +9,7 @@
                   ((step $x) $p $t))
                (, (exec (IC $y $x $ab) $sp $st)
                   (exec (R $x) $p $t)
-                  (step (IC 0 1 0) $sp $st)) 
-)
+                  (step (IC 0 1 0) $sp $st))) ;; adding its instance for later execution
 
 ((step 0)
       (, (petri (? $channel $payload $body))
@@ -24,7 +23,7 @@
 
 
 
-;; run generation
+;; run generation :- run all steps for one generation
 (exec run-gen
        (, ((step_r $name) $p1 $t1))
        (, (exec $name $p1 $t1))
@@ -32,7 +31,7 @@
 
 ;; evaluate individual fitness
  ((step_r A)
-     (, (Cons $h $t) 
+     (, (petri (Cons $h $t))
         (step (IC 0 1 0) $p1 $t1))
      (, (petri (! (fitness (Cons $h $t) ) (Cons $h $t)))
         (exec (IC 0 1 0) $p1 $t1)))
@@ -42,33 +41,55 @@
        (, (petri (! (Cons $h $t) $score))
           (step (IC 0 1 0) $p1 $t1))
        (, (petri (! (filter-one-element RESULT_1) ( ((Cons $h $t) $score) (S (S Z))) ) )
-          (exec (IC 0 1 0) $p1 $t1) (done)))
+          (exec (IC 0 1 0) $p1 $t1)))
 
 
 ;; mutate evaluated individual
 ((step_r C )
        (, (petri (! selected (Cons $h $t)) )
           (step (IC 0 1 0) $p1 $t1))
-       (, (petri (! (mutate Result ) ( (Cons $h $t) (S (S Z)))))   ;; TODO random mutation index
-          (petri (! (mutate Result ) ( (Cons $h $t) Z)))
+       (, (petri (! (mutate New_ind ) ( (Cons $h $t) (S (S Z)))))   ;; TODO random mutation index
+          (petri (! (mutate New_ind ) ( (Cons $h $t) Z)))
           (exec (IC 0 1 0) $p1 $t1)))
 
 ;; Crossover two evaluated individuals
 ((step_r D )
        (, (petri (! selected (Cons $h1 $t1)) )
           (petri (! selected (Cons $h2 $t2)) )
-          (step (IC 0 1 0) $p1 $t1))
-       (, (petri (! (crossover Result ) ( (S (S Z)) (Cons $h1 $t1) (Cons $h2 $t2))) ) ;; TODO random crossover point
-          (exec (IC 0 1 0) $p1 $t1)))
+          (step (IC 0 1 0) $ptt $tmp))
+       (, (petri (! (crossover New_siblings ) ( (S (S Z)) (Cons $h1 $t1) (Cons $h2 $t2))) ) ;; TODO random crossover point
+          (exec (IC 0 1 0) $ptt $tmp)))
 
-;; replace with new population
-((step_r E )
-       (, (petri () )
-          (petri (! Result_2 $ind2) )
-          (step (IC 0 1 0) $p1 $t1))
-       (, (petri (! selected $ind1) )
-          (petri (! selected $ind2) )
-          (exec (IC 0 1 0) $p1 $t1)))
+;; clean up for next generation
+;;      And add the new population and continue the process 
+
+((step_r E)
+       (, (petri (Cons $h1 $t1))
+          (petri (! (Cons $h2 $t2) $score))
+          (petri (! selected (Cons $h3 $t3)))
+          (petri (! New_ind (Cons $h4 $t4)))
+          (petri (! New_siblings ((Cons $h5 $t5) (Cons $h6 $t6)))))
+       (O (- (petri (Cons $h1 $t1)))
+          (- (petri (! (Cons $h2 $t2) $score)))
+          (- (petri (! selected (Cons $h3 $t3))))
+          (- (petri (! New_ind (Cons $h4 $t4))))
+          (- (petri (! New_siblings ((Cons $h5 $t5) (Cons $h6 $t6)))))
+          (+ (petri (Cons $h4 $t4)))
+          (+ (petri (Cons $h5 $t5)))
+          (+ (petri (Cons $h6 $t6)))
+          (+ (removed))))
+
+(Gen 0 1) (Gen 1 2) (Gen 2 3) (Gen 3 4) (Gen 4 5)
+;; Main loop :-
+;;         run for 5 generations
+
+(exec (Main 0)
+       (, (exec (Main $a) $p $t )
+           (exec run-gen $p1 $t1) (Gen $a $b))
+       (, (exec run-gen $p1 $t1)
+          (exec (Main $b) $p $t )
+         (Gen $a $b)))
+
 
 ;; intial popluation
 (petri (Cons 0 (Cons 1 (Cons 0 (Cons 1 (Cons 1 Nil))))))
@@ -143,6 +164,7 @@
 )
 
 (petri (? (crossover $ret) (Z $l1 $l2) (! $ret ($l2 $l1))))
+
 
 
 
